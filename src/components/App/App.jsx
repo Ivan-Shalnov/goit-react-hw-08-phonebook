@@ -25,6 +25,7 @@ export class App extends React.Component {
     } = event.target.elements;
     if (!this.isNameTaken(name)) {
       this.addContact(name, number);
+      event.target.reset();
     } else {
       alert(`${name} is already in contacts`);
     }
