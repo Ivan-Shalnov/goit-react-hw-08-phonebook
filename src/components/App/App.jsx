@@ -24,10 +24,16 @@ export class App extends React.Component {
     );
     return filteredContacts;
   };
-
+  deleteContact = idToDelete => {
+    const updatedContacts = this.state.contacts.filter(
+      ({ id }) => id !== idToDelete
+    );
+    this.setState({ contacts: updatedContacts });
+  };
   render() {
     const { contacts, filter } = this.state;
-    const { updateContacts, updateFilter, visibleContacts } = this;
+    const { updateContacts, updateFilter, visibleContacts, deleteContact } =
+      this;
     return (
       <Container>
         <Title>Phonebook</Title>
@@ -36,9 +42,8 @@ export class App extends React.Component {
           <h2>Contacts</h2>
           <Filter updateFilter={updateFilter} inputValue={filter} />
           <ContactList
-            visibleContacts={visibleContacts()}
-            contacts={contacts}
-            updateContacts={updateContacts}
+            contacts={visibleContacts()}
+            deleteContact={deleteContact}
           />
         </div>
       </Container>

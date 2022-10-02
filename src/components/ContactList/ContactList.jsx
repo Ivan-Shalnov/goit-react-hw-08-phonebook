@@ -3,18 +3,12 @@ import { Button } from 'components/common.styled';
 import { List, Item, Name, Phone } from './ContactList.styled';
 import React from 'react';
 class ContactList extends React.Component {
-  deleteContact = idToDelete => {
-    const updatedContacts = this.props.contacts.filter(
-      ({ id }) => id !== idToDelete
-    );
-    this.props.updateContacts(updatedContacts);
-  };
   render() {
-    const { visibleContacts } = this.props;
-    const { deleteContact } = this;
+    const { contacts } = this.props;
+    const { deleteContact } = this.props;
     return (
       <List>
-        {visibleContacts.map(({ id, name, number }) => (
+        {contacts.map(({ id, name, number }) => (
           <Item key={id}>
             <div>
               <Name>{name}</Name>
@@ -30,20 +24,13 @@ class ContactList extends React.Component {
   }
 }
 ContactList.propTypes = {
-  visibleContacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    })
-  ),
   contacts: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       number: PropTypes.string.isRequired,
     })
-  ),
-  updateContacts: PropTypes.func.isRequired,
+  ).isRequired,
+  deleteContact: PropTypes.func.isRequired,
 };
 export default ContactList;
