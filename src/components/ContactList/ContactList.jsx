@@ -1,12 +1,20 @@
 import PropTypes from 'prop-types';
 import { Button } from 'components/common.styled';
 import { List, Item, Name, Phone } from './ContactList.styled';
-const ContactList = ({ contacts, filter, handleDelete }) => {
-  return (
-    <List>
-      {contacts
-        .filter(({ name }) => name.toLowerCase().includes(filter.toLowerCase()))
-        .map(({ id, name, number }) => (
+import React from 'react';
+class ContactList extends React.Component {
+  deleteContact = idToDelete => {
+    const updatedContacts = this.props.contacts.filter(
+      ({ id }) => id !== idToDelete
+    );
+    this.props.updateContacts(updatedContacts);
+  };
+  render() {
+    const { visibleContacts } = this.props;
+    const { deleteContact } = this;
+    return (
+      <List>
+        {visibleContacts.map(({ id, name, number }) => (
           <Item key={id}>
             <div>
               <Name>{name}</Name>
@@ -14,13 +22,21 @@ const ContactList = ({ contacts, filter, handleDelete }) => {
                 {number.replace(/(\d{3})(\d{2})(\d{2})/, '$1-$2-$3')}
               </Phone>
             </div>
-            <Button onClick={() => handleDelete(id)}>Delete</Button>
+            <Button onClick={() => deleteContact(id)}>Delete</Button>
           </Item>
         ))}
-    </List>
-  );
-};
+      </List>
+    );
+  }
+}
 ContactList.propTypes = {
+  visibleContacts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      number: PropTypes.string.isRequired,
+    })
+  ),
   contacts: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
@@ -28,7 +44,6 @@ ContactList.propTypes = {
       number: PropTypes.string.isRequired,
     })
   ),
-  filter: PropTypes.string.isRequired,
-  handleDelete: PropTypes.func.isRequired,
+  updateContacts: PropTypes.func.isRequired,
 };
 export default ContactList;
