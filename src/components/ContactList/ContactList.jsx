@@ -4,8 +4,7 @@ import { List, Item, Name, Phone } from './ContactList.styled';
 import React from 'react';
 class ContactList extends React.Component {
   render() {
-    const { contacts } = this.props;
-    const { deleteContact } = this.props;
+    const { contacts, deleteContact } = this.props;
     return (
       <List>
         {contacts.map(({ id, name, number }) => (
