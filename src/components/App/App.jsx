@@ -1,4 +1,5 @@
 import React from 'react';
+import { nanoid } from 'nanoid';
 
 import { Container, Title } from './App.styled';
 import ContactForm from '../ContactForm/ContactForm';
@@ -14,8 +15,7 @@ export class App extends React.Component {
     ],
     filter: '',
   };
-  updateContacts = updatedContacts =>
-    this.setState({ contacts: updatedContacts });
+
   updateFilter = newFilter => this.setState({ filter: newFilter });
 
   visibleContacts = () => {
@@ -24,6 +24,21 @@ export class App extends React.Component {
     );
     return filteredContacts;
   };
+  addContact = ({ name, number }) => {
+    if (this.isNameTaken(name)) {
+      alert(`${name} is already in contacts`);
+      return;
+    }
+    const newContact = { id: nanoid(), name, number };
+    this.setState(() => ({ contacts: [...this.state.contacts, newContact] }));
+    return true;
+  };
+  isNameTaken(nameToCheck) {
+    nameToCheck = nameToCheck.toLowerCase();
+    return this.state.contacts.some(
+      ({ name }) => name.toLocaleLowerCase() === nameToCheck
+    );
+  }
   deleteContact = idToDelete => {
     const updatedContacts = this.state.contacts.filter(
       ({ id }) => id !== idToDelete
@@ -31,13 +46,12 @@ export class App extends React.Component {
     this.setState({ contacts: updatedContacts });
   };
   render() {
-    const { contacts, filter } = this.state;
-    const { updateContacts, updateFilter, visibleContacts, deleteContact } =
-      this;
+    const { filter } = this.state;
+    const { addContact, updateFilter, visibleContacts, deleteContact } = this;
     return (
       <Container>
         <Title>Phonebook</Title>
-        <ContactForm updateContacts={updateContacts} contacts={contacts} />
+        <ContactForm addContact={addContact} />
         <div>
           <h2>Contacts</h2>
           <Filter updateFilter={updateFilter} inputValue={filter} />

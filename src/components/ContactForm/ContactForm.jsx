@@ -1,34 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { nanoid } from 'nanoid';
 
 import { Input } from 'components/common.styled';
 import { ContactFormBtn, Form } from './ContactForm.styled';
 class ContactForm extends React.Component {
   handleSubmit = event => {
+    const { addContact } = this.props;
     const {
       name: { value: nameValue },
       number: { value: numberValue },
     } = event.target.elements;
-    if (this.isNameTaken(nameValue)) {
-      alert(`${nameValue} is already in contacts`);
-      return;
-    }
     event.preventDefault();
-    this.addContact(nameValue, numberValue);
-    event.target.reset();
+    if (addContact({ name: nameValue, number: numberValue })) {
+      event.target.reset();
+    }
   };
-  isNameTaken(nameToCheck) {
-    nameToCheck = nameToCheck.toLowerCase();
-    return this.props.contacts.some(
-      ({ name }) => name.toLocaleLowerCase() === nameToCheck
-    );
-  }
-  addContact(name, number) {
-    const newContact = { id: nanoid(), name, number };
-    const updatedContacts = [...this.props.contacts, newContact];
-    this.props.updateContacts(updatedContacts);
-  }
+
   render() {
     return (
       <Form onSubmit={this.handleSubmit}>
@@ -54,13 +41,6 @@ class ContactForm extends React.Component {
   }
 }
 ContactForm.propTypes = {
-  updateContacts: PropTypes.func.isRequired,
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    })
-  ),
+  addContact: PropTypes.func.isRequired,
 };
 export default ContactForm;
