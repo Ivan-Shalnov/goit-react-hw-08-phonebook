@@ -7,15 +7,26 @@ import Filter from '../Filter/Filter';
 import ContactList from '../ContactList/ContactList';
 export class App extends React.Component {
   state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '4591256' },
-      { id: 'id-2', name: 'Hermione Kline', number: '4438912' },
-      { id: 'id-3', name: 'Eden Clements', number: '6451779' },
-      { id: 'id-4', name: 'Annie Copeland', number: '2279126' },
-    ],
+    contacts: [],
     filter: '',
+    error: null,
   };
-
+  static LOCAL_STORAGE_KEY = 'contacts';
+  componentDidMount() {
+    try {
+      const savedContacts = JSON.parse(
+        localStorage.getItem(this.constructor.LOCAL_STORAGE_KEY)
+      );
+      if (savedContacts) this.setState({ contacts: savedContacts });
+    } catch {
+      this.setState(
+        { error: 'Cant read contacts from storage, storage will be cleared' },
+        () => {
+          setTimeout(this.handleStorageError, 3000);
+        }
+      );
+    }
+  }
   updateFilter = newFilter => this.setState({ filter: newFilter });
 
   visibleContacts = () => {
@@ -24,13 +35,26 @@ export class App extends React.Component {
     );
     return filteredContacts;
   };
+  handleStorageError = () => {
+    localStorage.removeItem(this.constructor.LOCAL_STORAGE_KEY);
+    this.setState({ error: null });
+  };
+  saveContactsToStorage() {
+    localStorage.setItem(
+      this.constructor.LOCAL_STORAGE_KEY,
+      JSON.stringify(this.state.contacts)
+    );
+  }
   addContact = ({ name, number }) => {
     if (this.isNameTaken(name)) {
       alert(`${name} is already in contacts`);
       return;
     }
     const newContact = { id: nanoid(), name, number };
-    this.setState(() => ({ contacts: [...this.state.contacts, newContact] }));
+    this.setState(
+      () => ({ contacts: [...this.state.contacts, newContact] }),
+      this.saveContactsToStorage
+    );
     return true;
   };
   isNameTaken(nameToCheck) {
@@ -43,7 +67,7 @@ export class App extends React.Component {
     const updatedContacts = this.state.contacts.filter(
       ({ id }) => id !== idToDelete
     );
-    this.setState({ contacts: updatedContacts });
+    this.setState({ contacts: updatedContacts }, this.saveContactsToStorage);
   };
   render() {
     const { filter } = this.state;
@@ -54,11 +78,20 @@ export class App extends React.Component {
         <ContactForm addContact={addContact} />
         <div>
           <h2>Contacts</h2>
-          <Filter updateFilter={updateFilter} inputValue={filter} />
-          <ContactList
-            contacts={visibleContacts()}
-            deleteContact={deleteContact}
-          />
+          {(() => {
+            if (this.state.error) return this.state.error;
+            return this.state.contacts.length !== 0 ? (
+              <div>
+                <Filter updateFilter={updateFilter} inputValue={filter} />
+                <ContactList
+                  contacts={visibleContacts()}
+                  deleteContact={deleteContact}
+                />
+              </div>
+            ) : (
+              'Contact list is empty'
+            );
+          })()}
         </div>
       </Container>
     );
