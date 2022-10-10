@@ -27,6 +27,11 @@ export class App extends React.Component {
       );
     }
   }
+  componentDidUpdate(_, prevState) {
+    if (prevState.contacts !== this.state.contacts) {
+      this.saveContactsToStorage();
+    }
+  }
   updateFilter = newFilter => this.setState({ filter: newFilter });
 
   visibleContacts = () => {
@@ -51,10 +56,7 @@ export class App extends React.Component {
       return;
     }
     const newContact = { id: nanoid(), name, number };
-    this.setState(
-      () => ({ contacts: [...this.state.contacts, newContact] }),
-      this.saveContactsToStorage
-    );
+    this.setState(() => ({ contacts: [...this.state.contacts, newContact] }));
     return true;
   };
   isNameTaken(nameToCheck) {
@@ -67,7 +69,7 @@ export class App extends React.Component {
     const updatedContacts = this.state.contacts.filter(
       ({ id }) => id !== idToDelete
     );
-    this.setState({ contacts: updatedContacts }, this.saveContactsToStorage);
+    this.setState({ contacts: updatedContacts });
   };
   render() {
     const { filter } = this.state;
