@@ -5,97 +5,76 @@ import { Container, Title } from './App.styled';
 import ContactForm from '../ContactForm/ContactForm';
 import Filter from '../Filter/Filter';
 import ContactList from '../ContactList/ContactList';
-export class App extends React.Component {
-  state = {
-    contacts: [],
-    filter: '',
-    error: null,
-  };
-  static LOCAL_STORAGE_KEY = 'contacts';
-  componentDidMount() {
+import { useState } from 'react';
+import { useEffect } from 'react';
+const LOCAL_STORAGE_KEY = 'contacts';
+export const App = () => {
+  const [contacts, setContacts] = useState([]);
+  const [filter, setFilter] = useState('');
+  const [error, setError] = useState(null);
+  // Get contacts from storage on mount
+  useEffect(() => {
+    console.log('Get from storage');
     try {
-      const savedContacts = JSON.parse(
-        localStorage.getItem(this.constructor.LOCAL_STORAGE_KEY)
-      );
-      if (savedContacts) this.setState({ contacts: savedContacts });
+      const savedContacts = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+      if (savedContacts) setContacts(savedContacts);
     } catch {
-      this.setState(
-        { error: 'Cant read contacts from storage, storage will be cleared' },
-        () => {
-          setTimeout(this.handleStorageError, 3000);
-        }
-      );
+      setError(() => {
+        setTimeout(() => setError(null), 3000);
+        return 'Cant read contacts from storage, storage will be cleared';
+      });
     }
-  }
-  componentDidUpdate(_, prevState) {
-    if (prevState.contacts !== this.state.contacts) {
-      this.saveContactsToStorage();
-    }
-  }
-  updateFilter = newFilter => this.setState({ filter: newFilter });
+  }, []);
 
-  visibleContacts = () => {
-    const filteredContacts = this.state.contacts.filter(({ name }) =>
-      name.toLowerCase().includes(this.state.filter)
+  // Save contacts to storage on change
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(contacts));
+  }, [contacts]);
+  const updateFilter = newFilter => setFilter(newFilter);
+  const visibleContacts = contacts.filter(({ name }) =>
+    name.toLowerCase().includes(filter)
+  );
+  const isNameTaken = nameToCheck =>
+    contacts.some(
+      ({ name }) => name.toLowerCase() === nameToCheck.toLowerCase()
     );
-    return filteredContacts;
-  };
-  handleStorageError = () => {
-    localStorage.removeItem(this.constructor.LOCAL_STORAGE_KEY);
-    this.setState({ error: null });
-  };
-  saveContactsToStorage() {
-    localStorage.setItem(
-      this.constructor.LOCAL_STORAGE_KEY,
-      JSON.stringify(this.state.contacts)
-    );
-  }
-  addContact = ({ name, number }) => {
-    if (this.isNameTaken(name)) {
+
+  const addContact = ({ name, number }) => {
+    if (isNameTaken(name)) {
       alert(`${name} is already in contacts`);
       return;
     }
     const newContact = { id: nanoid(), name, number };
-    this.setState(() => ({ contacts: [...this.state.contacts, newContact] }));
+    setContacts(prevContacts => [...prevContacts, newContact]);
     return true;
   };
-  isNameTaken(nameToCheck) {
-    nameToCheck = nameToCheck.toLowerCase();
-    return this.state.contacts.some(
-      ({ name }) => name.toLocaleLowerCase() === nameToCheck
-    );
-  }
-  deleteContact = idToDelete => {
-    const updatedContacts = this.state.contacts.filter(
-      ({ id }) => id !== idToDelete
-    );
-    this.setState({ contacts: updatedContacts });
+  const deleteContact = idToDelete => {
+    const updatedContacts = contacts.filter(({ id }) => id !== idToDelete);
+    setContacts(updatedContacts);
   };
-  render() {
-    const { filter } = this.state;
-    const { addContact, updateFilter, visibleContacts, deleteContact } = this;
-    return (
-      <Container>
-        <Title>Phonebook</Title>
-        <ContactForm addContact={addContact} />
-        <div>
-          <h2>Contacts</h2>
-          {(() => {
-            if (this.state.error) return this.state.error;
-            return this.state.contacts.length !== 0 ? (
+  return (
+    <Container>
+      <Title>Phonebook</Title>
+      <ContactForm addContact={addContact} />
+      <div>
+        <h2>Contacts</h2>
+        {(() => {
+          if (error) return error;
+          if (contacts.length !== 0) {
+            return (
               <div>
                 <Filter updateFilter={updateFilter} inputValue={filter} />
                 <ContactList
-                  contacts={visibleContacts()}
+                  contacts={visibleContacts}
                   deleteContact={deleteContact}
                 />
               </div>
-            ) : (
-              'Contact list is empty'
             );
-          })()}
-        </div>
-      </Container>
-    );
-  }
-}
+          } else {
+            return 'Contact list is empty';
+          }
+        })()}
+      </div>
+    </Container>
+  );
+};
