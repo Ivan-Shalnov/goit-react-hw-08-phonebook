@@ -1,14 +1,18 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Title, FilterInput } from './Filter.styled';
-const Filter = ({ updateFilter, inputValue }) => {
-  const filterChange = event => updateFilter(event.target.value.toLowerCase());
+import { useDispatch, useSelector } from 'react-redux';
+import { getFilter } from 'redux/selectors';
+import { setFilter } from 'redux/filterSlice';
+const Filter = () => {
+  const dispatch = useDispatch();
+  const filterValue = useSelector(getFilter);
+  const filterChange = e => dispatch(setFilter(e.target.value));
   return (
     <>
       <Title>Filter contacts by name</Title>
       <FilterInput
         type="text"
-        value={inputValue}
+        value={filterValue}
         pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
         title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
         onChange={filterChange}
@@ -17,8 +21,4 @@ const Filter = ({ updateFilter, inputValue }) => {
   );
 };
 
-Filter.propTypes = {
-  inputValue: PropTypes.string,
-  updateFilter: PropTypes.func.isRequired,
-};
 export default Filter;
