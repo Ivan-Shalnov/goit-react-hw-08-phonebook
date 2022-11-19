@@ -3,8 +3,8 @@ import React from 'react';
 import { Input } from 'components/common.styled';
 import { ContactFormBtn, Form } from './ContactForm.styled';
 import { useDispatch, useSelector } from 'react-redux';
-import { addContact } from 'redux/contactsSlice';
-import { getContacts } from 'redux/selectors';
+import { addContact } from 'redux/operations';
+import { selectContacts } from 'redux/selectors';
 const isNameTaken = ({ contacts, name }) => {
   return contacts.some(
     contact => contact.name.toLowerCase() === name.toLowerCase()
@@ -13,7 +13,7 @@ const isNameTaken = ({ contacts, name }) => {
 
 const ContactForm = () => {
   const dispatch = useDispatch();
-  const contacts = useSelector(getContacts);
+  const contacts = useSelector(selectContacts);
   const handleSubmit = event => {
     event.preventDefault();
     const {
@@ -24,7 +24,7 @@ const ContactForm = () => {
       alert(`${nameValue} is already exist`);
       return;
     }
-    dispatch(addContact({ name: nameValue, number: numberValue }));
+    dispatch(addContact({ name: nameValue, phone: numberValue }));
     event.target.reset();
   };
 
