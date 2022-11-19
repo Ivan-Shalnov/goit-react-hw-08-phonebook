@@ -2,13 +2,21 @@ import { fetchContacts, addContact, deleteContact } from './operations';
 
 const { createSlice } = require('@reduxjs/toolkit');
 
-const contactsInitState = { list: [], isLoading: false, error: null };
+const contactsInitState = {
+  list: [],
+  isLoading: false,
+  error: null,
+  message: null,
+};
 const contactsSlice = createSlice({
   name: 'contacts',
   initialState: contactsInitState,
   reducers: {
     setError(state, action) {
       state.error = action.payload;
+    },
+    setMessage(state, action) {
+      state.message = action.payload;
     },
   },
   extraReducers: {
@@ -35,6 +43,7 @@ const contactsSlice = createSlice({
       state.isLoading = false;
       state.error = null;
       state.list.push(action.payload);
+      state.message = 'Contact added';
     },
     [deleteContact.isLoading](state) {
       state.isLoading = true;
@@ -48,8 +57,9 @@ const contactsSlice = createSlice({
         contact => contact.id === action.payload.id
       );
       state.list.splice(index, 1);
+      state.message = 'Contact deleted';
     },
   },
 });
-export const { setError } = contactsSlice.actions;
+export const { setError, setMessage } = contactsSlice.actions;
 export const contactsReducer = contactsSlice.reducer;

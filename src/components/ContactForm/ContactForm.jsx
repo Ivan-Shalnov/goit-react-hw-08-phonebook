@@ -5,6 +5,7 @@ import { ContactFormBtn, Form } from './ContactForm.styled';
 import { useDispatch, useSelector } from 'react-redux';
 import { addContact } from 'redux/operations';
 import { selectContacts } from 'redux/selectors';
+import { setMessage } from 'redux/contactsSlice';
 const isNameTaken = ({ contacts, name }) => {
   return contacts.some(
     contact => contact.name.toLowerCase() === name.toLowerCase()
@@ -21,7 +22,7 @@ const ContactForm = () => {
       number: { value: numberValue },
     } = event.target.elements;
     if (isNameTaken({ contacts, name: nameValue })) {
-      alert(`${nameValue} is already exist`);
+      dispatch(setMessage(`${nameValue} is already exist`));
       return;
     }
     dispatch(addContact({ name: nameValue, phone: numberValue }));

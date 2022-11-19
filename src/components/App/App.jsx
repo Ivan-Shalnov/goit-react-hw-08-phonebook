@@ -9,6 +9,7 @@ import {
   selectContacts,
   selectError,
   selectIsLoading,
+  selectMessage,
   selectTotalContactsCount,
 } from 'redux/selectors';
 import { useEffect, useRef } from 'react';
@@ -16,14 +17,21 @@ import { ToastContainer, toast } from 'react-toastify';
 
 import 'react-toastify/dist/ReactToastify.min.css';
 import { fetchContacts } from 'redux/operations';
-import { setError } from 'redux/contactsSlice';
+import { setError, setMessage } from 'redux/contactsSlice';
 export const App = () => {
   const dispatch = useDispatch();
   const contacts = useSelector(selectContacts);
   const isLoading = useSelector(selectIsLoading);
   const error = useSelector(selectError);
+  const message = useSelector(selectMessage);
   const totalContactsCount = useSelector(selectTotalContactsCount);
   const loadingToastId = useRef(null);
+  useEffect(() => {
+    if (message) {
+      toast.info(message);
+      dispatch(setMessage(null));
+    }
+  }, [message, dispatch]);
   useEffect(() => {
     if (isLoading && !loadingToastId.current) {
       loadingToastId.current = toast.loading('Loading', { autoClose: false });
