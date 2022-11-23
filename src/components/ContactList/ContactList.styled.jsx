@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-// import { Button } from 'components/common.styled';
 export const List = styled.ul`
   padding: 0;
 `;
@@ -16,7 +15,6 @@ export const Item = styled.li`
 export const Name = styled.div`
   font-size: 16px;
   line-height: 1.5;
-  color: white;
 `;
 export const Phone = styled.div`
   font-size: 12px;

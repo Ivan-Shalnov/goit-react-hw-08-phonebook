@@ -1,74 +1,64 @@
-import React from 'react';
+import { Navigate } from 'react-router';
+import { ContactsPage } from 'pages/Contacts/Contacts';
+import { LoginPage } from 'pages/Login/Login';
+import { RegisterPage } from 'pages/Register/Register';
+import { Route, Routes } from 'react-router';
+import { ToastContainer } from 'react-toastify';
+import { RestrictedRoute } from 'components/RestrictedRoute';
+import { PrivateRoute } from 'components/PrivateRoute';
+import { Layout } from 'components/Layout/Layout';
+import { useDispatch } from 'react-redux';
+import { useEffect } from 'react';
+import { refreshUser } from 'redux/auth/operations';
+import { useSelector } from 'react-redux';
+import { selectIsRefreshing } from 'redux/auth/selectors';
 
-import { Container, Title } from './App.styled';
-import ContactForm from '../ContactForm/ContactForm';
-import Filter from '../Filter/Filter';
-import ContactList from '../ContactList/ContactList';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  selectContacts,
-  selectError,
-  selectIsLoading,
-  selectMessage,
-  selectTotalContactsCount,
-} from 'redux/selectors';
-import { useEffect, useRef } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
-
-import 'react-toastify/dist/ReactToastify.min.css';
-import { fetchContacts } from 'redux/operations';
-import { setError, setMessage } from 'redux/contactsSlice';
 export const App = () => {
   const dispatch = useDispatch();
-  const contacts = useSelector(selectContacts);
-  const isLoading = useSelector(selectIsLoading);
-  const error = useSelector(selectError);
-  const message = useSelector(selectMessage);
-  const totalContactsCount = useSelector(selectTotalContactsCount);
-  const loadingToastId = useRef(null);
+  const isRefershing = useSelector(selectIsRefreshing);
   useEffect(() => {
-    if (message) {
-      toast.info(message);
-      dispatch(setMessage(null));
-    }
-  }, [message, dispatch]);
-  useEffect(() => {
-    if (isLoading && !loadingToastId.current) {
-      loadingToastId.current = toast.loading('Loading', { autoClose: false });
-      return;
-    }
-    if (!isLoading && loadingToastId.current) {
-      toast.dismiss(loadingToastId.current);
-      loadingToastId.current = null;
-    }
-  }, [isLoading]);
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-      dispatch(setError(null));
-    }
-  }, [error, dispatch]);
-  useEffect(() => {
-    dispatch(fetchContacts());
+    dispatch(refreshUser());
   }, [dispatch]);
+  if (isRefershing) return <p>Loading</p>;
   return (
     <>
-      <Container>
-        <Title>Phonebook</Title>
-        <ContactForm />
-        <div>
-          <h2>Contacts</h2>
-          {contacts.length > 0 ? (
-            <div>
-              <Filter />
-              <ContactList />
-              <p>Total: {totalContactsCount}</p>
-            </div>
-          ) : (
-            <div>Contacts list is empty</div>
-          )}
-        </div>
-      </Container>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Navigate to="/contacts" />}></Route>
+          <Route
+            path="/register"
+            element={
+              <RestrictedRoute redirectTo="/contacts">
+                <RegisterPage />
+              </RestrictedRoute>
+            }
+          ></Route>
+          <Route
+            path="/login"
+            element={
+              <RestrictedRoute redirectTo="/contacts">
+                <LoginPage />
+              </RestrictedRoute>
+            }
+          ></Route>
+          <Route
+            path="/contacts"
+            element={
+              <PrivateRoute redirectTo="/login">
+                <ContactsPage />
+              </PrivateRoute>
+            }
+          />
+        </Route>
+        <Route
+          path="*"
+          element={
+            <RestrictedRoute redirectTo="/contacts">
+              <LoginPage />
+            </RestrictedRoute>
+          }
+        ></Route>
+      </Routes>
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
